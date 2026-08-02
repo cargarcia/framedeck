@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>LEGO Mosaic — photo vers tableau de dots</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <header class="app-header">
+            <h1>LEGO Mosaic</h1>
+            <p>Transforme une photo en tableau de dots LEGO. Tout se passe dans le navigateur, aucune image n'est envoyée.</p>
+        </header>
+
+        <main class="app-layout">
+            <aside class="panel controls">
+                <section class="control-group">
+                    <h2>1. Photo</h2>
+                    <div id="dropzone" class="dropzone">
+                        <input id="fileInput" type="file" accept="image/*" hidden />
+                        <button id="pickFileButton" type="button" class="primary">Choisir une image</button>
+                        <span class="hint">ou glisse-dépose un fichier ici</span>
+                        <span id="fileName" class="file-name"></span>
+                    </div>
+                    <label class="field">
+                        <span>Cadrage</span>
+                        <select id="fitSelect">
+                            <option value="cover">Remplir (recadrer)</option>
+                            <option value="stretch">Étirer</option>
+                        </select>
+                    </label>
+                </section>
+
+                <section class="control-group">
+                    <h2>2. Dimensions du tableau</h2>
+                    <div class="field-row">
+                        <label class="field">
+                            <span>Largeur (dots)</span>
+                            <input id="columnsInput" type="number" min="8" max="256" step="1" value="48" />
+                        </label>
+                        <label class="field">
+                            <span>Hauteur (dots)</span>
+                            <input id="rowsInput" type="number" min="8" max="256" step="1" value="48" />
+                        </label>
+                    </div>
+                    <label class="checkbox">
+                        <input id="lockAspectInput" type="checkbox" />
+                        <span>Conserver les proportions de la photo</span>
+                    </label>
+                    <div class="presets">
+                        <button type="button" class="chip" data-preset="32x32">32 × 32</button>
+                        <button type="button" class="chip" data-preset="48x48">48 × 48</button>
+                        <button type="button" class="chip" data-preset="64x64">64 × 64</button>
+                        <button type="button" class="chip" data-preset="96x64">96 × 64</button>
+                    </div>
+                    <p id="physicalSize" class="hint"></p>
+                </section>
+
+                <section class="control-group">
+                    <h2>3. Couleurs</h2>
+                    <label class="field">
+                        <span>Mode de palette</span>
+                        <select id="paletteModeSelect">
+                            <option value="auto">LEGO — meilleures couleurs automatiques</option>
+                            <option value="manual">LEGO — sélection manuelle</option>
+                            <option value="free">Libre — couleurs extraites de la photo</option>
+                        </select>
+                    </label>
+                    <label class="field" id="colorCountField">
+                        <span>Nombre de couleurs : <output id="colorCountValue">8</output></span>
+                        <input id="colorCountInput" type="range" min="2" max="32" step="1" value="8" />
+                    </label>
+                    <label class="checkbox">
+                        <input id="ditherInput" type="checkbox" checked />
+                        <span>Tramage Floyd–Steinberg (dégradés plus doux)</span>
+                    </label>
+                    <details class="swatch-panel">
+                        <summary>Couleurs LEGO autorisées (<span id="allowedCount">0</span>)</summary>
+                        <div class="swatch-actions">
+                            <button type="button" class="chip" id="selectAllColors">Tout activer</button>
+                            <button type="button" class="chip" id="clearAllColors">Tout désactiver</button>
+                        </div>
+                        <div id="swatchGrid" class="swatch-grid"></div>
+                    </details>
+                </section>
+
+                <section class="control-group">
+                    <h2>4. Réglages image</h2>
+                    <label class="field">
+                        <span>Luminosité : <output id="brightnessValue">0</output></span>
+                        <input id="brightnessInput" type="range" min="-80" max="80" step="1" value="0" />
+                    </label>
+                    <label class="field">
+                        <span>Contraste : <output id="contrastValue">0</output></span>
+                        <input id="contrastInput" type="range" min="-80" max="80" step="1" value="0" />
+                    </label>
+                    <label class="field">
+                        <span>Saturation : <output id="saturationValue">1.0</output></span>
+                        <input id="saturationInput" type="range" min="0" max="2" step="0.05" value="1" />
+                    </label>
+                </section>
+
+                <section class="control-group">
+                    <h2>5. Affichage</h2>
+                    <label class="field">
+                        <span>Style des dots</span>
+                        <select id="studStyleSelect">
+                            <option value="stud">Tenons LEGO</option>
+                            <option value="flat">Aplat</option>
+                        </select>
+                    </label>
+                    <label class="checkbox">
+                        <input id="gridInput" type="checkbox" checked />
+                        <span>Grille + repères 16 × 16</span>
+                    </label>
+                    <label class="checkbox">
+                        <input id="labelInput" type="checkbox" />
+                        <span>Numéro de couleur sur chaque dot</span>
+                    </label>
+                    <div class="presets">
+                        <button id="exportPngButton" type="button" class="chip">Exporter PNG</button>
+                        <button id="exportPlanButton" type="button" class="chip">Exporter le plan (.txt)</button>
+                    </div>
+                </section>
+            </aside>
+
+            <section class="panel preview">
+                <div id="canvasWrapper" class="canvas-wrapper">
+                    <canvas id="mosaicCanvas"></canvas>
+                    <p id="emptyState" class="empty-state">Choisis une photo pour générer la mosaïque.</p>
+                </div>
+                <div class="bom">
+                    <h2>Liste de pièces <span id="totalPieces" class="hint"></span></h2>
+                    <ul id="bomList"></ul>
+                </div>
+            </section>
+        </main>
+
+        <script src="palette.js"></script>
+        <script src="mosaic.js"></script>
+        <script src="renderer.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
