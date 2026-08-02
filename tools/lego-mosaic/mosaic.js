@@ -259,5 +259,36 @@
         return indices;
     }
 
-    window.LegoMosaic = { sampleGrid, buildPalette, mapCells };
+    /* Etiquette de plaque facon plan de montage: colonne en lettres, ligne en chiffres (A1, B1, AA3...). */
+    function getPlateLabel(plateColumn, plateRow) {
+        let letters = '';
+        let remaining = plateColumn;
+        do {
+            letters = String.fromCharCode(65 + (remaining % 26)) + letters;
+            remaining = Math.floor(remaining / 26) - 1;
+        } while (remaining >= 0);
+        return `${letters}${plateRow + 1}`;
+    }
+
+    /* Decoupe le tableau en plaques de plateSize tenons; les bords peuvent etre partiels. */
+    function computePlates({ columns, rows, plateSize }) {
+        if (!plateSize) return [];
+        const plates = [];
+        for (let plateRow = 0; plateRow * plateSize < rows; plateRow += 1) {
+            for (let plateColumn = 0; plateColumn * plateSize < columns; plateColumn += 1) {
+                const x = plateColumn * plateSize;
+                const y = plateRow * plateSize;
+                plates.push({
+                    label: getPlateLabel(plateColumn, plateRow),
+                    x,
+                    y,
+                    width: Math.min(plateSize, columns - x),
+                    height: Math.min(plateSize, rows - y),
+                });
+            }
+        }
+        return plates;
+    }
+
+    window.LegoMosaic = { sampleGrid, buildPalette, mapCells, computePlates, getPlateLabel };
 })();

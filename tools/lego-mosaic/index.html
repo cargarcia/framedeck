@@ -101,7 +101,31 @@
                 </section>
 
                 <section class="control-group">
-                    <h2>5. Affichage</h2>
+                    <h2>5. Plaques de montage</h2>
+                    <label class="field">
+                        <span>Découpage en plaques</span>
+                        <select id="plateSizeSelect">
+                            <option value="0">Aucun</option>
+                            <option value="16">16 × 16</option>
+                            <option value="32" selected>32 × 32</option>
+                            <option value="48">48 × 48</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>Vue</span>
+                        <select id="viewSelect">
+                            <option value="all">Mosaïque complète</option>
+                        </select>
+                    </label>
+                    <label class="checkbox">
+                        <input id="plateLabelInput" type="checkbox" checked />
+                        <span>Étiquettes de plaques (A1, B1, …)</span>
+                    </label>
+                    <p id="platesInfo" class="hint"></p>
+                </section>
+
+                <section class="control-group">
+                    <h2>6. Affichage</h2>
                     <label class="field">
                         <span>Style des dots</span>
                         <select id="studStyleSelect">
@@ -111,14 +135,14 @@
                     </label>
                     <label class="checkbox">
                         <input id="gridInput" type="checkbox" checked />
-                        <span>Grille + repères 16 × 16</span>
+                        <span>Grille entre les dots</span>
                     </label>
                     <label class="checkbox">
                         <input id="labelInput" type="checkbox" />
                         <span>Numéro de couleur sur chaque dot</span>
                     </label>
                     <div class="presets">
-                        <button id="exportPngButton" type="button" class="chip">Exporter PNG</button>
+                        <button id="exportPngButton" type="button" class="chip">Exporter PNG (vue actuelle)</button>
                         <button id="exportPlanButton" type="button" class="chip">Exporter le plan (.txt)</button>
                     </div>
                 </section>

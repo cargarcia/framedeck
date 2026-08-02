@@ -23,9 +23,11 @@ Le traitement est 100 % local : l'image n'est jamais envoyée sur un réseau.
 - **Catalogue de 51 couleurs LEGO** activables/désactivables (le mode auto ne pioche que dans les couleurs actives).
 - **Tramage Floyd–Steinberg** optionnel pour lisser les dégradés avec peu de couleurs.
 - **Réglages image** : luminosité, contraste, saturation.
-- **Rendu** : tenons LEGO ou aplat, grille et repères tous les 16 dots (taille d'une plaque), numéro de couleur sur chaque dot.
-- **Liste de pièces** : nombre et pourcentage par couleur, total de dots, dimensions réelles estimées (1 dot = 8 mm).
-- **Exports** : PNG haute résolution et plan de montage `.txt` (légende + grille numérotée ligne par ligne).
+- **Découpage en plaques** (aucun / 16×16 / 32×32 / 48×48) : séparateurs et étiquettes `A1, B1, A2…` sur la mosaïque, décompte des plaques et signalement des bords partiels à recouper.
+- **Vue plaque par plaque** : afficher une seule plaque en grand pour la monter, avec sa propre liste de pièces.
+- **Rendu** : tenons LEGO ou aplat, grille entre les dots, numéro de couleur sur chaque dot.
+- **Liste de pièces** : nombre et pourcentage par couleur (du tableau entier ou de la plaque affichée), total de dots, dimensions réelles estimées (1 dot = 8 mm).
+- **Exports** : PNG haute résolution de la vue courante (tableau complet ou plaque isolée) et plan de montage `.txt` — légende globale puis une section par plaque avec ses coordonnées globales, ses quantités et sa grille numérotée.
 
 ## Fichiers
 
@@ -34,7 +36,7 @@ Le traitement est 100 % local : l'image n'est jamais envoyée sur un réseau.
 | `index.html` | structure de l'UI |
 | `styles.css` | thème sombre, layout |
 | `palette.js` | catalogue LEGO + conversions sRGB/Lab + distance perceptuelle |
-| `mosaic.js` | échantillonnage de la grille, k-means, choix de palette, tramage |
+| `mosaic.js` | échantillonnage de la grille, k-means, choix de palette, tramage, découpage en plaques |
 | `renderer.js` | dessin des dots sur canvas (aperçu et export) |
 | `app.js` | câblage UI, exports, liste de pièces |
 

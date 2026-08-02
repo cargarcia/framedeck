@@ -1,7 +1,7 @@
 /* Cablage de l'interface: lecture de la photo, parametres, rendu et exports. */
 (function () {
     const { catalog, isLightColor } = window.LegoPalette;
-    const { sampleGrid, buildPalette, mapCells } = window.LegoMosaic;
+    const { sampleGrid, buildPalette, mapCells, computePlates } = window.LegoMosaic;
     const { drawMosaic } = window.LegoRenderer;
 
     const STUD_SIZE_MM = 8;
@@ -13,6 +13,7 @@
         'swatchGrid', 'allowedCount', 'selectAllColors', 'clearAllColors',
         'brightnessInput', 'brightnessValue', 'contrastInput', 'contrastValue',
         'saturationInput', 'saturationValue', 'studStyleSelect', 'gridInput', 'labelInput',
+        'plateSizeSelect', 'viewSelect', 'plateLabelInput', 'platesInfo',
         'mosaicCanvas', 'emptyState', 'bomList', 'totalPieces', 'exportPngButton', 'exportPlanButton',
     ].forEach((id) => {
         elements[id] = document.getElementById(id);
@@ -23,6 +24,8 @@
         fileLabel: '',
         allowedColorNames: new Set(catalog.map((color) => color.name)),
         lastResult: null,
+        plates: [],
+        plateSignature: '',
     };
 
     function renderSwatchGrid() {
@@ -64,6 +67,8 @@
             studStyle: elements.studStyleSelect.value,
             isGridVisible: elements.gridInput.checked,
             isLabelVisible: elements.labelInput.checked,
+            plateSize: Number(elements.plateSizeSelect.value),
+            isPlateLabelVisible: elements.plateLabelInput.checked,
             adjustments: {
                 brightness: Number(elements.brightnessInput.value),
                 contrast: Number(elements.contrastInput.value),
@@ -81,6 +86,48 @@
     function computePreviewStudSize(columns, rows) {
         const availableWidth = Math.min(1100, elements.mosaicCanvas.parentElement.clientWidth - 24);
         return Math.max(4, Math.min(28, Math.floor(availableWidth / Math.max(columns, rows * 0.6))));
+    }
+
+    /* Reconstruit la liste des plaques et le menu de vue, en gardant la plaque selectionnee si possible. */
+    function refreshPlates({ columns, rows, plateSize }) {
+        state.plates = computePlates({ columns, rows, plateSize });
+        const signature = `${columns}x${rows}@${plateSize}`;
+        if (signature === state.plateSignature) return;
+        state.plateSignature = signature;
+
+        const previousValue = elements.viewSelect.value;
+        elements.viewSelect.innerHTML = '<option value="all">Mosaïque complète</option>';
+        state.plates.forEach((plate) => {
+            const option = document.createElement('option');
+            option.value = plate.label;
+            option.textContent = `Plaque ${plate.label} (${plate.width} × ${plate.height})`;
+            elements.viewSelect.appendChild(option);
+        });
+        const isStillAvailable = Array.from(elements.viewSelect.options).some(
+            (option) => option.value === previousValue,
+        );
+        elements.viewSelect.value = isStillAvailable ? previousValue : 'all';
+    }
+
+    function getSelectedRegion() {
+        if (elements.viewSelect.value === 'all') return null;
+        return state.plates.find((plate) => plate.label === elements.viewSelect.value) || null;
+    }
+
+    function updatePlatesInfo({ columns, rows, plateSize }) {
+        if (!plateSize) {
+            elements.platesInfo.textContent = 'Le tableau est monté d’une seule pièce.';
+            return;
+        }
+        const plateColumns = Math.ceil(columns / plateSize);
+        const plateRows = Math.ceil(rows / plateSize);
+        const partialCount = state.plates.filter(
+            (plate) => plate.width < plateSize || plate.height < plateSize,
+        ).length;
+        const partialLabel = partialCount ? `, dont ${partialCount} à recouper` : ', toutes complètes';
+        elements.platesInfo.textContent =
+            `${plateColumns} × ${plateRows} plaques de ${plateSize} × ${plateSize} ` +
+            `(${state.plates.length} au total${partialLabel})`;
     }
 
     function regenerate() {
@@ -116,6 +163,8 @@
         });
 
         state.lastResult = { ...params, palette, indices };
+        refreshPlates(params);
+        const region = getSelectedRegion();
         elements.emptyState.style.display = 'none';
         elements.mosaicCanvas.style.display = 'block';
         drawMosaic({
@@ -124,13 +173,20 @@
             rows: params.rows,
             indices,
             palette,
-            studSize: computePreviewStudSize(params.columns, params.rows),
+            studSize: computePreviewStudSize(
+                region ? region.width : params.columns,
+                region ? region.height : params.rows,
+            ),
             studStyle: params.studStyle,
             isGridVisible: params.isGridVisible,
             isLabelVisible: params.isLabelVisible,
+            plateSize: params.plateSize,
+            isPlateLabelVisible: params.isPlateLabelVisible,
+            region,
         });
-        renderBillOfMaterials();
+        renderBillOfMaterials(region);
         updatePhysicalSize(params.columns, params.rows);
+        updatePlatesInfo(params);
     }
 
     let regenerateTimer = null;
@@ -139,20 +195,27 @@
         regenerateTimer = window.setTimeout(regenerate, 80);
     }
 
-    function countPieces() {
+    /* Compte les pieces du tableau entier, ou seulement d'une plaque si region est fournie. */
+    function countPieces(region) {
+        const { columns, indices, palette } = state.lastResult;
+        const area = region || { x: 0, y: 0, width: columns, height: state.lastResult.rows };
         const counts = new Map();
-        state.lastResult.indices.forEach((paletteIndex) => {
-            counts.set(paletteIndex, (counts.get(paletteIndex) || 0) + 1);
-        });
+        for (let row = 0; row < area.height; row += 1) {
+            for (let column = 0; column < area.width; column += 1) {
+                const paletteIndex = indices[(area.y + row) * columns + (area.x + column)];
+                counts.set(paletteIndex, (counts.get(paletteIndex) || 0) + 1);
+            }
+        }
         return Array.from(counts.entries())
-            .map(([paletteIndex, count]) => ({ paletteIndex, count, color: state.lastResult.palette[paletteIndex] }))
+            .map(([paletteIndex, count]) => ({ paletteIndex, count, color: palette[paletteIndex] }))
             .sort((first, second) => second.count - first.count);
     }
 
-    function renderBillOfMaterials() {
-        const entries = countPieces();
-        const total = state.lastResult.indices.length;
-        elements.totalPieces.textContent = `— ${total} dots, ${entries.length} couleurs`;
+    function renderBillOfMaterials(region) {
+        const entries = countPieces(region);
+        const total = region ? region.width * region.height : state.lastResult.indices.length;
+        const scopeLabel = region ? `plaque ${region.label} — ` : '';
+        elements.totalPieces.textContent = `— ${scopeLabel}${total} dots, ${entries.length} couleurs`;
         elements.bomList.innerHTML = '';
         entries.forEach(({ paletteIndex, count, color }) => {
             const item = document.createElement('li');
@@ -224,6 +287,7 @@
 
     function exportPng() {
         if (!state.lastResult) return;
+        const region = getSelectedRegion();
         const exportCanvas = document.createElement('canvas');
         drawMosaic({
             canvas: exportCanvas,
@@ -235,31 +299,65 @@
             studStyle: state.lastResult.studStyle,
             isGridVisible: state.lastResult.isGridVisible,
             isLabelVisible: state.lastResult.isLabelVisible,
+            plateSize: state.lastResult.plateSize,
+            isPlateLabelVisible: state.lastResult.isPlateLabelVisible,
+            region,
         });
-        exportCanvas.toBlob((blob) => downloadBlob(blob, `${state.fileLabel || 'mosaic'}-lego.png`), 'image/png');
+        const suffix = region ? `-plaque-${region.label}` : '';
+        exportCanvas.toBlob(
+            (blob) => downloadBlob(blob, `${state.fileLabel || 'mosaic'}-lego${suffix}.png`),
+            'image/png',
+        );
+    }
+
+    function buildSectionLines(section) {
+        const { columns, indices } = state.lastResult;
+        const isWholeBoard = section.width === columns && section.height === state.lastResult.rows;
+        const title = isWholeBoard
+            ? '=== Tableau complet ==='
+            : `=== Plaque ${section.label} — colonnes ${section.x + 1}-${section.x + section.width}, ` +
+              `lignes ${section.y + 1}-${section.y + section.height} (${section.width} x ${section.height}) ===`;
+        const lines = [
+            title,
+            'Pièces: ' +
+                countPieces(section)
+                    .map(({ paletteIndex, count }) => `${paletteIndex + 1}x${count}`)
+                    .join('  '),
+            '',
+        ];
+        for (let row = 0; row < section.height; row += 1) {
+            const cells = [];
+            for (let column = 0; column < section.width; column += 1) {
+                cells.push(String(indices[(section.y + row) * columns + (section.x + column)] + 1).padStart(2, ' '));
+            }
+            lines.push(`${String(row + 1).padStart(3, ' ')} | ${cells.join(' ')}`);
+        }
+        lines.push('');
+        return lines;
     }
 
     function exportPlan() {
         if (!state.lastResult) return;
-        const { columns, rows, indices, palette } = state.lastResult;
+        const { columns, rows, plateSize } = state.lastResult;
+        const sections = state.plates.length
+            ? state.plates
+            : [{ label: 'complète', x: 0, y: 0, width: columns, height: rows }];
         const lines = [
             `Plan de montage LEGO — ${columns} x ${rows} dots`,
+            plateSize
+                ? `Découpage: ${Math.ceil(columns / plateSize)} x ${Math.ceil(rows / plateSize)} plaques de ${plateSize} x ${plateSize}`
+                : 'Découpage: aucun (montage d’un seul tenant)',
             '',
-            'Légende:',
+            'Légende (tableau complet):',
             ...countPieces().map(
                 ({ paletteIndex, count, color }) =>
                     `  ${String(paletteIndex + 1).padStart(2, ' ')} = ${color.name} (${color.hex}) x${count}`,
             ),
             '',
-            'Grille (ligne 1 = haut):',
+            'Grilles (ligne 1 = haut de la plaque):',
+            '',
         ];
-        for (let row = 0; row < rows; row += 1) {
-            const cells = [];
-            for (let column = 0; column < columns; column += 1) {
-                cells.push(String(indices[row * columns + column] + 1).padStart(2, ' '));
-            }
-            lines.push(`${String(row + 1).padStart(3, ' ')} | ${cells.join(' ')}`);
-        }
+        sections.forEach((section) => lines.push(...buildSectionLines(section)));
         downloadBlob(new Blob([lines.join('\n')], { type: 'text/plain' }), `${state.fileLabel || 'mosaic'}-plan.txt`);
     }
 
@@ -337,9 +435,16 @@
             scheduleRegenerate();
         });
 
-        [elements.fitSelect, elements.ditherInput, elements.studStyleSelect, elements.gridInput, elements.labelInput].forEach(
-            (element) => element.addEventListener('change', scheduleRegenerate),
-        );
+        [
+            elements.fitSelect,
+            elements.ditherInput,
+            elements.studStyleSelect,
+            elements.gridInput,
+            elements.labelInput,
+            elements.plateSizeSelect,
+            elements.viewSelect,
+            elements.plateLabelInput,
+        ].forEach((element) => element.addEventListener('change', scheduleRegenerate));
         window.addEventListener('resize', scheduleRegenerate);
         elements.exportPngButton.addEventListener('click', exportPng);
         elements.exportPlanButton.addEventListener('click', exportPlan);
@@ -347,5 +452,8 @@
 
     renderSwatchGrid();
     bindEvents();
-    updatePhysicalSize(clampInt(elements.columnsInput.value, 8, 256), clampInt(elements.rowsInput.value, 8, 256));
+    const initialParams = readParams();
+    updatePhysicalSize(initialParams.columns, initialParams.rows);
+    refreshPlates(initialParams);
+    updatePlatesInfo(initialParams);
 })();
