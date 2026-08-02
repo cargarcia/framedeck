@@ -7,15 +7,18 @@
         <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-        <header class="app-header">
+        <header class="masthead">
+            <div class="stud-row" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
             <h1>LEGO Mosaic</h1>
-            <p>Transforme une photo en tableau de dots LEGO. Tout se passe dans le navigateur, aucune image n'est envoyée.</p>
+            <p>Transforme une photo en tableau de dots, plaque par plaque. Tout est calculé dans ton navigateur : l'image ne quitte jamais l'appareil.</p>
         </header>
 
-        <main class="app-layout">
-            <aside class="panel controls">
-                <section class="control-group">
-                    <h2>1. Photo</h2>
+        <main class="layout">
+            <aside class="rail">
+                <section class="step-card">
+                    <h2><span class="step">01</span> Photo</h2>
                     <div id="dropzone" class="dropzone">
                         <input id="fileInput" type="file" accept="image/*" hidden />
                         <button id="pickFileButton" type="button" class="primary">Choisir une image</button>
@@ -31,8 +34,8 @@
                     </label>
                 </section>
 
-                <section class="control-group">
-                    <h2>2. Dimensions du tableau</h2>
+                <section class="step-card">
+                    <h2><span class="step">02</span> Dimensions</h2>
                     <div class="field-row">
                         <label class="field">
                             <span>Largeur (dots)</span>
@@ -47,17 +50,17 @@
                         <input id="lockAspectInput" type="checkbox" />
                         <span>Conserver les proportions de la photo</span>
                     </label>
-                    <div class="presets">
+                    <div class="chip-row">
                         <button type="button" class="chip" data-preset="32x32">32 × 32</button>
                         <button type="button" class="chip" data-preset="48x48">48 × 48</button>
                         <button type="button" class="chip" data-preset="64x64">64 × 64</button>
                         <button type="button" class="chip" data-preset="96x64">96 × 64</button>
                     </div>
-                    <p id="physicalSize" class="hint"></p>
+                    <p id="physicalSize" class="readout"></p>
                 </section>
 
-                <section class="control-group">
-                    <h2>3. Couleurs</h2>
+                <section class="step-card">
+                    <h2><span class="step">03</span> Couleurs</h2>
                     <label class="field">
                         <span>Mode de palette</span>
                         <select id="paletteModeSelect">
@@ -67,7 +70,7 @@
                         </select>
                     </label>
                     <label class="field" id="colorCountField">
-                        <span>Nombre de couleurs : <output id="colorCountValue">8</output></span>
+                        <span>Nombre de couleurs <output id="colorCountValue">8</output></span>
                         <input id="colorCountInput" type="range" min="2" max="32" step="1" value="8" />
                     </label>
                     <label class="checkbox">
@@ -75,8 +78,8 @@
                         <span>Tramage Floyd–Steinberg (dégradés plus doux)</span>
                     </label>
                     <details class="swatch-panel">
-                        <summary>Couleurs LEGO autorisées (<span id="allowedCount">0</span>)</summary>
-                        <div class="swatch-actions">
+                        <summary>Couleurs LEGO autorisées <output id="allowedCount">0</output></summary>
+                        <div class="chip-row">
                             <button type="button" class="chip" id="selectAllColors">Tout activer</button>
                             <button type="button" class="chip" id="clearAllColors">Tout désactiver</button>
                         </div>
@@ -84,24 +87,24 @@
                     </details>
                 </section>
 
-                <section class="control-group">
-                    <h2>4. Réglages image</h2>
+                <section class="step-card">
+                    <h2><span class="step">04</span> Réglages image</h2>
                     <label class="field">
-                        <span>Luminosité : <output id="brightnessValue">0</output></span>
+                        <span>Luminosité <output id="brightnessValue">0</output></span>
                         <input id="brightnessInput" type="range" min="-80" max="80" step="1" value="0" />
                     </label>
                     <label class="field">
-                        <span>Contraste : <output id="contrastValue">0</output></span>
+                        <span>Contraste <output id="contrastValue">0</output></span>
                         <input id="contrastInput" type="range" min="-80" max="80" step="1" value="0" />
                     </label>
                     <label class="field">
-                        <span>Saturation : <output id="saturationValue">1.0</output></span>
+                        <span>Saturation <output id="saturationValue">1.00</output></span>
                         <input id="saturationInput" type="range" min="0" max="2" step="0.05" value="1" />
                     </label>
                 </section>
 
-                <section class="control-group">
-                    <h2>5. Plaques de montage</h2>
+                <section class="step-card">
+                    <h2><span class="step">05</span> Plaques de montage</h2>
                     <label class="field">
                         <span>Découpage en plaques</span>
                         <select id="plateSizeSelect">
@@ -121,11 +124,11 @@
                         <input id="plateLabelInput" type="checkbox" checked />
                         <span>Étiquettes de plaques (A1, B1, …)</span>
                     </label>
-                    <p id="platesInfo" class="hint"></p>
+                    <p id="platesInfo" class="readout"></p>
                 </section>
 
-                <section class="control-group">
-                    <h2>6. Affichage</h2>
+                <section class="step-card">
+                    <h2><span class="step">06</span> Affichage</h2>
                     <label class="field">
                         <span>Style des dots</span>
                         <select id="studStyleSelect">
@@ -141,24 +144,27 @@
                         <input id="labelInput" type="checkbox" />
                         <span>Numéro de couleur sur chaque dot</span>
                     </label>
-                    <div class="presets">
-                        <button id="exportPngButton" type="button" class="chip">Exporter PNG (vue actuelle)</button>
-                        <button id="exportPlanButton" type="button" class="chip">Exporter le plan (.txt)</button>
+                    <div class="chip-row">
+                        <button id="exportPngButton" type="button" class="chip">Exporter le PNG</button>
+                        <button id="exportPlanButton" type="button" class="chip">Télécharger le plan</button>
+                        <button id="copyPlanButton" type="button" class="chip">Copier le plan</button>
                     </div>
                 </section>
             </aside>
 
-            <section class="panel preview">
+            <section class="stage">
                 <div id="canvasWrapper" class="canvas-wrapper">
                     <canvas id="mosaicCanvas"></canvas>
                     <p id="emptyState" class="empty-state">Choisis une photo pour générer la mosaïque.</p>
                 </div>
-                <div class="bom">
-                    <h2>Liste de pièces <span id="totalPieces" class="hint"></span></h2>
+                <div class="parts-bin">
+                    <h2>Liste de pièces <span id="totalPieces" class="readout"></span></h2>
                     <ul id="bomList"></ul>
                 </div>
             </section>
         </main>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
         <script src="palette.js"></script>
         <script src="mosaic.js"></script>

@@ -103,12 +103,13 @@
         plateSize,
         isPlateLabelVisible,
         region,
+        backgroundColor,
     }) {
         const visible = region || { x: 0, y: 0, width: columns, height: rows };
         const context = canvas.getContext('2d');
         canvas.width = visible.width * studSize;
         canvas.height = visible.height * studSize;
-        context.fillStyle = '#111318';
+        context.fillStyle = backgroundColor || '#111318';
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         for (let row = 0; row < visible.height; row += 1) {

@@ -14,7 +14,8 @@
         'brightnessInput', 'brightnessValue', 'contrastInput', 'contrastValue',
         'saturationInput', 'saturationValue', 'studStyleSelect', 'gridInput', 'labelInput',
         'plateSizeSelect', 'viewSelect', 'plateLabelInput', 'platesInfo',
-        'mosaicCanvas', 'emptyState', 'bomList', 'totalPieces', 'exportPngButton', 'exportPlanButton',
+        'mosaicCanvas', 'emptyState', 'bomList', 'totalPieces', 'toast',
+        'exportPngButton', 'exportPlanButton', 'copyPlanButton',
     ].forEach((id) => {
         elements[id] = document.getElementById(id);
     });
@@ -75,6 +76,20 @@
                 saturation: Number(elements.saturationInput.value),
             },
         };
+    }
+
+    // Le fond du canvas suit le theme de la page (token CSS), pas une couleur figee.
+    function getBackdropColor() {
+        const token = getComputedStyle(document.documentElement).getPropertyValue('--canvas-backdrop').trim();
+        return token || '#111318';
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+        elements.toast.textContent = message;
+        elements.toast.classList.add('is-visible');
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => elements.toast.classList.remove('is-visible'), 2200);
     }
 
     function clampInt(value, minimum, maximum) {
@@ -183,6 +198,7 @@
             plateSize: params.plateSize,
             isPlateLabelVisible: params.isPlateLabelVisible,
             region,
+            backgroundColor: getBackdropColor(),
         });
         renderBillOfMaterials(region);
         updatePhysicalSize(params.columns, params.rows);
@@ -230,7 +246,7 @@
             name.title = `${color.name} ${color.hex}`;
             const countLabel = document.createElement('span');
             countLabel.className = 'bom-count';
-            countLabel.textContent = `${count} (${Math.round((count / total) * 100)}%)`;
+            countLabel.innerHTML = `<strong>×${count}</strong> ${Math.round((count / total) * 100)}%`;
             item.append(swatch, name, countLabel);
             elements.bomList.appendChild(item);
         });
@@ -302,12 +318,13 @@
             plateSize: state.lastResult.plateSize,
             isPlateLabelVisible: state.lastResult.isPlateLabelVisible,
             region,
+            backgroundColor: getBackdropColor(),
         });
         const suffix = region ? `-plaque-${region.label}` : '';
-        exportCanvas.toBlob(
-            (blob) => downloadBlob(blob, `${state.fileLabel || 'mosaic'}-lego${suffix}.png`),
-            'image/png',
-        );
+        exportCanvas.toBlob((blob) => {
+            downloadBlob(blob, `${state.fileLabel || 'mosaic'}-lego${suffix}.png`);
+            showToast(region ? `PNG de la plaque ${region.label} téléchargé` : 'PNG téléchargé');
+        }, 'image/png');
     }
 
     function buildSectionLines(section) {
@@ -336,8 +353,7 @@
         return lines;
     }
 
-    function exportPlan() {
-        if (!state.lastResult) return;
+    function buildPlanText() {
         const { columns, rows, plateSize } = state.lastResult;
         const sections = state.plates.length
             ? state.plates
@@ -358,7 +374,33 @@
             '',
         ];
         sections.forEach((section) => lines.push(...buildSectionLines(section)));
-        downloadBlob(new Blob([lines.join('\n')], { type: 'text/plain' }), `${state.fileLabel || 'mosaic'}-plan.txt`);
+        return lines.join('\n');
+    }
+
+    function exportPlan() {
+        if (!state.lastResult) return;
+        downloadBlob(new Blob([buildPlanText()], { type: 'text/plain' }), `${state.fileLabel || 'mosaic'}-plan.txt`);
+        showToast('Plan téléchargé');
+    }
+
+    /* Alternative au telechargement, utile quand la page tourne dans un cadre restreint. */
+    async function copyPlan() {
+        if (!state.lastResult) return;
+        const planText = buildPlanText();
+        try {
+            await navigator.clipboard.writeText(planText);
+            showToast('Plan copié dans le presse-papiers');
+        } catch (error) {
+            const scratchArea = document.createElement('textarea');
+            scratchArea.value = planText;
+            scratchArea.style.position = 'fixed';
+            scratchArea.style.opacity = '0';
+            document.body.appendChild(scratchArea);
+            scratchArea.select();
+            const hasCopied = document.execCommand('copy');
+            scratchArea.remove();
+            showToast(hasCopied ? 'Plan copié dans le presse-papiers' : 'Copie refusée par le navigateur');
+        }
     }
 
     function bindEvents() {
@@ -448,6 +490,14 @@
         window.addEventListener('resize', scheduleRegenerate);
         elements.exportPngButton.addEventListener('click', exportPng);
         elements.exportPlanButton.addEventListener('click', exportPlan);
+        elements.copyPlanButton.addEventListener('click', copyPlan);
+
+        // Le fond du canvas est peint en dur: il faut redessiner quand le theme change.
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', scheduleRegenerate);
+        new MutationObserver(scheduleRegenerate).observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme'],
+        });
     }
 
     renderSwatchGrid();
