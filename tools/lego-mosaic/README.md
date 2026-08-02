@@ -13,6 +13,27 @@ python3 -m http.server 8787 --directory tools/lego-mosaic
 
 Le traitement est 100 % local : l'image n'est jamais envoyée sur un réseau.
 
+## Publier
+
+Générer les versions autonomes (CSS, JS et favicon inlinés, aucune requête externe) :
+
+```bash
+node tools/lego-mosaic/build-artifact.js
+# dist/lego-mosaic.html           page complète, pour un hébergement statique
+# dist/lego-mosaic.artifact.html  fragment sans doctype/head, pour publication en Artifact
+```
+
+Déployer sur un serveur en SSH/rsync (le script construit puis envoie, en renommant en `index.html`) :
+
+```bash
+DEPLOY_HOST=user@exchange.garc-ia.eu \
+DEPLOY_PATH=/var/www/exchange \
+./tools/lego-mosaic/deploy.sh
+```
+
+Variables optionnelles : `DEPLOY_FILENAME` (défaut `index.html`), `DEPLOY_PORT` (défaut `22`), `DRY_RUN=1` pour simuler.
+L'authentification est celle de ton client SSH (agent ou `~/.ssh/config`) : le script ne manipule aucune clé ni mot de passe.
+
 ## Fonctionnalités
 
 - **Dimensions paramétrables** : largeur × hauteur en dots (8 → 256), presets 32×32 / 48×48 / 64×64 / 96×64, verrou de proportions, cadrage « remplir » ou « étirer ».
