@@ -32,7 +32,7 @@ type ZoomScene = {
 export const ZOOM_SCENES: ZoomScene[] = [
   { id: "globe", label: "Earth", scale: "12 742 km", from: 0, duration: 170, focus: CENTER },
   { id: "ocean", label: "Bay of Biscay", scale: "40 km", from: 146, duration: 174, focus: CENTER },
-  { id: "vessel", label: "Offshore patrol vessel", scale: "90 m", from: 296, duration: 174, focus: { x: 920, y: 546 } },
+  { id: "vessel", label: "Offshore patrol vessel", scale: "90 m", from: 296, duration: 174, focus: { x: 887, y: 488 } },
   { id: "ops", label: "Operations center", scale: "12 m", from: 446, duration: 174, focus: { x: 960, y: 750 } },
   { id: "console", label: "Tactical console", scale: "60 cm", from: 596, duration: 144, focus: { x: 620, y: 590 } },
   { id: "neural", label: "Electronics · neural core", scale: "4 mm", from: 716, duration: 124, focus: CENTER },
