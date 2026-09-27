@@ -38,6 +38,13 @@ import {
   SHOWREEL_WIDTH,
   Showreel,
 } from "./compositions/Showreel/Showreel";
+import {
+  NAVAL_ZOOM_DURATION,
+  NAVAL_ZOOM_FPS,
+  NAVAL_ZOOM_HEIGHT,
+  NAVAL_ZOOM_WIDTH,
+  NavalZoom,
+} from "./compositions/NavalZoom/NavalZoom";
 import { ProjectComposition } from "./compositions/Project/Project";
 import { DEFAULT_PROJECT, type Project, projectDuration } from "./project";
 import { compositions } from "./registry";
@@ -108,6 +115,15 @@ export const RemotionRoot: React.FC = () => {
         fps={SHOWREEL_FPS}
         width={SHOWREEL_WIDTH}
         height={SHOWREEL_HEIGHT}
+      />
+      <Composition
+        id="NavalZoom"
+        component={NavalZoom}
+        durationInFrames={NAVAL_ZOOM_DURATION}
+        fps={NAVAL_ZOOM_FPS}
+        width={NAVAL_ZOOM_WIDTH}
+        height={NAVAL_ZOOM_HEIGHT}
+        defaultProps={{}}
       />
       <Composition
         id="MyComp"
