@@ -137,7 +137,7 @@ export const NeuralScene: React.FC<{ frame: number }> = ({ frame }) => {
         style={{
           position: "absolute",
           left: 150,
-          top: 150,
+          top: 210,
           fontFamily: MONO_FONT,
           fontWeight: 700,
           fontSize: 20,
