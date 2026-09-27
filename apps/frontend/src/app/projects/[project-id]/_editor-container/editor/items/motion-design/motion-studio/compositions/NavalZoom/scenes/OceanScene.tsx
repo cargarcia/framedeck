@@ -25,8 +25,8 @@ export const OceanScene: React.FC<{ frame: number }> = ({ frame }) => {
           ))}
         </g>
         <g fontFamily={MONO_FONT} fontSize={16} fill={NAVAL_COLORS.foam} opacity={gridIn * 0.6}>
-          <text x={248} y={172}>46°30′N</text>
-          <text x={248} y={532}>46°12′N</text>
+          <text x={1690} y={172}>46°30′N</text>
+          <text x={1690} y={532}>46°12′N</text>
           <text x={728} y={1068}>6°20′W</text>
           <text x={1208} y={1068}>5°50′W</text>
         </g>
@@ -40,7 +40,7 @@ export const OceanScene: React.FC<{ frame: number }> = ({ frame }) => {
               cy={CENTER.y}
               r={20 + pulse * 260}
               fill="none"
-              stroke={NAVAL_COLORS.cyan}
+              stroke={NAVAL_COLORS.amber}
               strokeWidth={2}
               opacity={(1 - pulse) * 0.6}
             />
@@ -69,8 +69,8 @@ export const OceanScene: React.FC<{ frame: number }> = ({ frame }) => {
           transform: `translate3d(${(1 - labelIn) * 20}px, 0, 0)`,
         }}
       >
-        <div style={{ color: NAVAL_COLORS.cyan }}>CONTACT · OPV</div>
-        <div style={{ opacity: 0.75, fontWeight: 500 }}>17 KN · HDG 082°</div>
+        <div style={{ color: NAVAL_COLORS.amber }}>CONTACT · OPV</div>
+        <div style={{ opacity: 0.75, fontWeight: 500 }}>17 NŒUDS · CAP 082°</div>
       </div>
     </AbsoluteFill>
   );

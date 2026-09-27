@@ -5,11 +5,11 @@ const RADAR = { x: 620, y: 590, radius: 360 };
 const SWEEP_SPEED = 3.2;
 
 const CONTACTS = [
-  { id: "0412", bearing: 38, range: 0.72, classification: "MERCHANT", color: NAVAL_COLORS.cyan },
-  { id: "0415", bearing: 112, range: 0.48, classification: "FISHING", color: NAVAL_COLORS.cyan },
-  { id: "0419", bearing: 205, range: 0.83, classification: "UNKNOWN", color: NAVAL_COLORS.amber },
-  { id: "0421", bearing: 287, range: 0.35, classification: "FRIENDLY", color: "#6BFFB0" },
-  { id: "0427", bearing: 330, range: 0.6, classification: "AIR", color: "#FF6B6B" },
+  { id: "0412", bearing: 38, range: 0.72, classification: "MARCHAND", color: NAVAL_COLORS.cyan },
+  { id: "0415", bearing: 112, range: 0.48, classification: "PÊCHE", color: NAVAL_COLORS.cyan },
+  { id: "0419", bearing: 205, range: 0.83, classification: "INCONNU", color: NAVAL_COLORS.foam },
+  { id: "0421", bearing: 287, range: 0.35, classification: "AMI", color: "#6BFFB0" },
+  { id: "0427", bearing: 330, range: 0.6, classification: "AÉRIEN", color: "#FF6B6B" },
 ];
 
 export const ConsoleScene: React.FC<{ frame: number }> = ({ frame }) => {
@@ -30,7 +30,7 @@ export const ConsoleScene: React.FC<{ frame: number }> = ({ frame }) => {
           top: 80,
           width: 1700,
           height: 920,
-          borderRadius: 26,
+          borderRadius: 0,
           background: "#010A10",
           boxShadow: `inset 0 0 0 3px #1E3246, 0 0 120px rgba(63,216,255,0.15)`,
           overflow: "hidden",
@@ -39,7 +39,7 @@ export const ConsoleScene: React.FC<{ frame: number }> = ({ frame }) => {
       />
       <svg width={1920} height={1080} style={{ position: "absolute", inset: 0, opacity: bootIn }}>
         <g fontFamily={MONO_FONT} fontWeight={700} fontSize={18} letterSpacing={2} fill={NAVAL_COLORS.cyan}>
-          <text x={150} y={190}>TACTICAL SITUATION · COMMAND</text>
+          <text x={150} y={190}>SITUATION TACTIQUE · COMMANDEMENT</text>
           <text x={1770} y={190} textAnchor="end">
             {`14:32:${String(7 + Math.floor(frame / 60)).padStart(2, "0")}Z`}
           </text>
@@ -79,11 +79,11 @@ export const ConsoleScene: React.FC<{ frame: number }> = ({ frame }) => {
             </g>
           );
         })}
-        <path d={`M ${RADAR.x - 10},${RADAR.y + 12} L ${RADAR.x},${RADAR.y - 16} L ${RADAR.x + 10},${RADAR.y + 12} Z`} fill={NAVAL_COLORS.foam} />
+        <path d={`M ${RADAR.x - 10},${RADAR.y + 12} L ${RADAR.x},${RADAR.y - 16} L ${RADAR.x + 10},${RADAR.y + 12} Z`} fill={NAVAL_COLORS.amber} />
 
         <g fontFamily={MONO_FONT} fontSize={17}>
           <text x={1110} y={260} fill={NAVAL_COLORS.cyan} fontWeight={700} letterSpacing={2}>
-            TRACK   BRG   RNG    CLASS
+            PISTE   GIS   DIST   CLASSE
           </text>
           {CONTACTS.map((contact, index) => {
             const rowIn = tween({ frame, start: 10 + index * 5, duration: 16 });
@@ -95,7 +95,7 @@ export const ConsoleScene: React.FC<{ frame: number }> = ({ frame }) => {
           })}
         </g>
 
-        {["SIGNAL", "CONFIDENCE", "THREAT", "LINK"].map((label, index) => {
+        {["SIGNAL", "CONFIANCE", "MENACE", "LIAISON"].map((label, index) => {
           const level = 0.35 + 0.6 * Math.abs(Math.sin(frame / (18 + index * 5) + index));
           return (
             <g key={label} transform={`translate(1110, ${520 + index * 62})`}>
@@ -103,7 +103,7 @@ export const ConsoleScene: React.FC<{ frame: number }> = ({ frame }) => {
                 {label}
               </text>
               <rect y={12} width={600} height={14} fill="#0E2436" />
-              <rect y={12} width={600 * level * bootIn} height={14} fill={index === 2 ? NAVAL_COLORS.amber : NAVAL_COLORS.cyan} />
+              <rect y={12} width={600 * level * bootIn} height={14} fill={NAVAL_COLORS.cyan} />
             </g>
           );
         })}

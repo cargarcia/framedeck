@@ -51,7 +51,7 @@ Load [./references/design-language.md](./references/design-language.md) before d
 | File | Use it for |
 | --- | --- |
 | `ZoomLayer.tsx` | Chaining scenes by diving into a focus point: log-space scale, focus drift to center, soft elliptical reveal, exit blur. |
-| `NavalZoomHud.tsx` | Zoom factor, scale bar, coordinates, chapter label, progress line. |
+| `NavalZoomHud.tsx` | Zoom factor, scale bar, coordinates, corner brackets, progress line, and the chapter lower third (index + Barlow Condensed title from each scene's `title`). |
 | `scenes/GlobeScene.tsx` | Orthographic Earth from Natural Earth data (`land-rings.ts`), graticule, atmosphere, target marker. |
 | `scenes/OceanSurface.tsx` + `Wake.tsx` | Animated sea from above and a Kelvin wake. |
 | `scenes/VesselScene.tsx` | Full-bleed photo with Ken Burns, tracking box, scan line, callouts anchored in photo coordinates. |

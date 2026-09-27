@@ -1,5 +1,5 @@
 import { AbsoluteFill, Img, spring, staticFile, useVideoConfig } from "remotion";
-import { DISPLAY_FONT, MONO_FONT, NAVAL_COLORS, tween } from "../constants";
+import { MONO_FONT, NAVAL_COLORS, TITLE_FONT, tween } from "../constants";
 
 const WORDMARK = "NAVAL GROUP";
 const BRAND_NAVY = "#0B2A5B";
@@ -32,10 +32,10 @@ export const LogoScene: React.FC<LogoSceneProps> = ({ frame, logoSrc }) => {
                 <div
                   key={index}
                   style={{
-                    fontFamily: DISPLAY_FONT,
-                    fontWeight: 900,
-                    fontSize: 170,
-                    letterSpacing: "0.06em",
+                    fontFamily: TITLE_FONT,
+                    fontWeight: 700,
+                    fontSize: 200,
+                    letterSpacing: "0.1em",
                     lineHeight: 1.05,
                     color: BRAND_NAVY,
                     whiteSpace: "pre",
@@ -72,7 +72,7 @@ export const LogoScene: React.FC<LogoSceneProps> = ({ frame, logoSrc }) => {
             transform: `translate3d(0, ${(1 - captionIn) * 16}px, 0)`,
           }}
         >
-          FROM ORBIT TO ALGORITHM
+          DE L’ORBITE À L’ALGORITHME
         </div>
       </div>
     </AbsoluteFill>

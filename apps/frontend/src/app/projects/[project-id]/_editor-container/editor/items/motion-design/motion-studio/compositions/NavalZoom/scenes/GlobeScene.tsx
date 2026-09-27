@@ -178,7 +178,7 @@ export const GlobeScene: React.FC<{ frame: number }> = ({ frame }) => {
           whiteSpace: "nowrap",
         }}
       >
-        BAY OF BISCAY
+        GOLFE DE GASCOGNE
         <div style={{ color: NAVAL_COLORS.foam, opacity: 0.7, fontWeight: 500 }}>46°12′N · 006°04′W</div>
       </div>
     </AbsoluteFill>

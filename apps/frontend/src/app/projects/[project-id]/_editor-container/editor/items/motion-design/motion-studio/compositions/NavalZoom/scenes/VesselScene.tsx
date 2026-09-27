@@ -11,14 +11,14 @@ function toScreen(photoX: number, photoY: number) {
 }
 
 const CALLOUTS = [
-  { label: "MAST · SENSORS", point: toScreen(410, 160), offsetX: -170, offsetY: -60, delay: 20 },
-  { label: "AFT DECK · RHIB", point: toScreen(215, 355), offsetX: 80, offsetY: 200, delay: 34 },
-  { label: "MAIN GUN", point: toScreen(695, 372), offsetX: 170, offsetY: -150, delay: 46 },
-  { label: "BRIDGE · OPERATIONS ▸", point: toScreen(462, 298), offsetX: 150, offsetY: -190, delay: 66, isHighlight: true },
+  { label: "MÂT · CAPTEURS", point: toScreen(410, 160), offsetX: -170, offsetY: -60, delay: 20 },
+  { label: "PLAGE ARRIÈRE · EMBARCATION", point: toScreen(215, 355), offsetX: 80, offsetY: 200, delay: 34 },
+  { label: "CANON PRINCIPAL", point: toScreen(695, 372), offsetX: 170, offsetY: -150, delay: 46 },
+  { label: "PASSERELLE · CENTRAL OPS ▸", point: toScreen(462, 298), offsetX: 150, offsetY: -190, delay: 66, isHighlight: true },
 ];
 
 // Tracking box around the hull, in screen space.
-const TARGET_BOX = { ...toScreen(110, 140), right: toScreen(905, 530).x, bottom: toScreen(905, 530).y };
+const TARGET_BOX = { ...toScreen(135, 170), right: toScreen(890, 520).x, bottom: toScreen(890, 520).y };
 
 export const VesselScene: React.FC<{ frame: number }> = ({ frame }) => {
   const kenBurns = tween({ frame, start: 0, duration: 174, from: 1.04, to: 1.0 });
@@ -53,8 +53,9 @@ export const VesselScene: React.FC<{ frame: number }> = ({ frame }) => {
         </g>
         <line x1={scanX} y1={TARGET_BOX.y} x2={scanX} y2={TARGET_BOX.bottom} stroke={NAVAL_COLORS.cyan} strokeOpacity={0.35 * lockIn} strokeWidth={2} />
         <text
-          x={TARGET_BOX.x + 70}
-          y={TARGET_BOX.y + 40}
+          x={TARGET_BOX.right - 70}
+          y={TARGET_BOX.bottom - 30}
+          textAnchor="end"
           fontFamily={MONO_FONT}
           fontWeight={700}
           fontSize={20}
@@ -62,7 +63,7 @@ export const VesselScene: React.FC<{ frame: number }> = ({ frame }) => {
           fill={NAVAL_COLORS.cyan}
           opacity={lockIn}
         >
-          {`TRACK LOCKED · OPV · ${(0.4 + lockIn * 0.59).toFixed(2)} CONF`}
+          {`PISTE VERROUILLÉE · OPV · CONFIANCE ${Math.round((0.4 + lockIn * 0.59) * 100)} %`}
         </text>
 
         {CALLOUTS.map((callout) => {

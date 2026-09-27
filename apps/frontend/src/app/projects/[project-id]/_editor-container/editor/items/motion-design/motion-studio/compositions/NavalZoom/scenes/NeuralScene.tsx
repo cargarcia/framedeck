@@ -41,10 +41,10 @@ function mix(a: number, b: number, amount: number) {
 }
 
 export const NeuralScene: React.FC<{ frame: number }> = ({ frame }) => {
-  const morph = tween({ frame, start: 30, duration: 44, easing: easeInOutQuint });
-  const converge = tween({ frame, start: 92, duration: 32, easing: easeInExpo });
-  const wave = (frame - 58) / 9;
-  const flash = tween({ frame, start: 104, duration: 20 });
+  const morph = tween({ frame, start: 26, duration: 40, easing: easeInOutQuint });
+  const converge = tween({ frame, start: 82, duration: 30, easing: easeInExpo });
+  const wave = (frame - 50) / 8;
+  const flash = tween({ frame, start: 94, duration: 20 });
 
   const positions = NODES.map((node) => {
     const x = mix(mix(node.pad.x, node.neuron.x, morph), CENTER.x, converge);
@@ -143,10 +143,10 @@ export const NeuralScene: React.FC<{ frame: number }> = ({ frame }) => {
           fontSize: 20,
           letterSpacing: "0.14em",
           color: NAVAL_COLORS.cyan,
-          opacity: (1 - converge) * tween({ frame, start: 6, duration: 20 }),
+          opacity: tween({ frame, start: 6, duration: 20 }) * (1 - tween({ frame, start: 44, duration: 10 })),
         }}
       >
-        {morph < 0.5 ? "SIGNAL PROCESSING · PCB" : "NEURAL INFERENCE · 28 NODES · 144 WEIGHTS"}
+        TRAITEMENT DU SIGNAL · CIRCUIT
       </div>
     </AbsoluteFill>
   );
