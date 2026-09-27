@@ -31,6 +31,13 @@ import {
   INTRO_TEXT_WIDTH,
   IntroText,
 } from "./compositions/IntroText";
+import {
+  SHOWREEL_DURATION,
+  SHOWREEL_FPS,
+  SHOWREEL_HEIGHT,
+  SHOWREEL_WIDTH,
+  Showreel,
+} from "./compositions/Showreel/Showreel";
 import { ProjectComposition } from "./compositions/Project/Project";
 import { DEFAULT_PROJECT, type Project, projectDuration } from "./project";
 import { compositions } from "./registry";
@@ -93,6 +100,14 @@ export const RemotionRoot: React.FC = () => {
         fps={HERO_DEMO_FPS}
         width={HERO_DEMO_WIDTH}
         height={HERO_DEMO_HEIGHT}
+      />
+      <Composition
+        id="Showreel"
+        component={Showreel}
+        durationInFrames={SHOWREEL_DURATION}
+        fps={SHOWREEL_FPS}
+        width={SHOWREEL_WIDTH}
+        height={SHOWREEL_HEIGHT}
       />
       <Composition
         id="MyComp"
